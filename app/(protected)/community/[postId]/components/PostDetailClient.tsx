@@ -53,7 +53,7 @@ export function PostDetailClient({ post: initialPost, currentUserId }: PostDetai
         .from('community_comments')
         .select(`
           *,
-          author:profiles(
+          author:profiles!community_comments_author_id_fkey(
             full_name,
             avatar_url,
             is_verified
@@ -118,7 +118,7 @@ export function PostDetailClient({ post: initialPost, currentUserId }: PostDetai
         })
         .select(`
           *,
-          author:profiles(
+          author:profiles!community_comments_author_id_fkey(
             full_name,
             avatar_url,
             is_verified

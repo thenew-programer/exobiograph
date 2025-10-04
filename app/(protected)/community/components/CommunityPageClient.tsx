@@ -46,7 +46,7 @@ export function CommunityPageClient({ userId }: CommunityPageClientProps) {
         .from('community_posts')
         .select(`
           *,
-          author:profiles(
+          author:profiles!community_posts_author_id_fkey(
             full_name,
             avatar_url,
             institution,
