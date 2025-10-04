@@ -16,5 +16,12 @@ export default async function CommunityPage() {
     redirect('/login');
   }
 
-  return <CommunityPageClient userId={user.id} />;
+  // Fetch user profile to check verification status
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('id, is_verified')
+    .eq('id', user.id)
+    .single();
+
+  return <CommunityPageClient userId={user.id} isVerified={profile?.is_verified || false} />;
 }

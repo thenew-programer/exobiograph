@@ -4,14 +4,28 @@ import { useEffect, useState } from 'react';
 import { createBrowserClient } from '@/lib/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
+interface DiagnosticResult {
+  success: boolean;
+  count?: number;
+  userId?: string;
+  email?: string;
+  error?: string;
+  details?: unknown;
+  sample?: unknown;
+}
+
+interface DiagnosticResults {
+  [key: string]: DiagnosticResult;
+}
+
 export default function DiagnosticPage() {
-  const [results, setResults] = useState<any>({});
+  const [results, setResults] = useState<DiagnosticResults>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function runDiagnostics() {
       const supabase = createBrowserClient();
-      const diagnostics: any = {};
+      const diagnostics: DiagnosticResults = {};
 
       try {
         // Test 1: Check authentication
@@ -93,14 +107,14 @@ export default function DiagnosticPage() {
         
         diagnostics.total_posts = {
           success: !countError,
-          count: count,
+          count: count || 0,
           error: countError?.message
         };
 
-      } catch (error: any) {
+      } catch (error) {
         diagnostics.general_error = {
           success: false,
-          error: error.message
+          error: error instanceof Error ? error.message : 'Unknown error'
         };
       }
 
@@ -119,7 +133,7 @@ export default function DiagnosticPage() {
     <div className="container mx-auto p-8 space-y-4">
       <h1 className="text-3xl font-bold mb-6">Community Database Diagnostics</h1>
       
-      {Object.entries(results).map(([key, value]: [string, any]) => (
+      {Object.entries(results).map(([key, value]) => (
         <Card key={key}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">

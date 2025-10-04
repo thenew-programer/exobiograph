@@ -5,13 +5,13 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import VerifiedBadge from '@/components/verification/VerifiedBadge';
 import { 
   Heart, 
   MessageCircle, 
   Share2, 
   Bookmark, 
   Eye,
-  CheckCircle2,
   ExternalLink,
   MoreVertical 
 } from 'lucide-react';
@@ -185,7 +185,7 @@ export function PostCard({ post, currentUserId, onUpdate }: PostCardProps) {
                     {post.author?.full_name || 'Unknown User'}
                   </span>
                   {post.author?.is_verified && (
-                    <CheckCircle2 className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                    <VerifiedBadge size="sm" />
                   )}
                   {post.author?.reputation_score !== undefined && post.author.reputation_score > 0 && (
                     <Badge variant="secondary" className="text-xs">

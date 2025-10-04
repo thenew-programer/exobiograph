@@ -15,17 +15,22 @@ import {
   Moon,
   Sun,
   Monitor,
-  Check
+  Check,
+  Building2,
+  FileText
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { toast } from "sonner";
+import VerifiedBadge from "@/components/verification/VerifiedBadge";
+import VerificationPrompt from "@/components/verification/VerificationPrompt";
 
 interface Props {
   user: User;
@@ -34,6 +39,8 @@ interface Props {
     avatar_url?: string;
     institution?: string;
     bio?: string;
+    is_verified?: boolean;
+    reputation_score?: number;
     preferences?: {
       email_notifications?: boolean;
       push_notifications?: boolean;
@@ -48,9 +55,12 @@ export function ProfileInterface({ user, profile }: Props) {
   const [activeTab, setActiveTab] = useState("profile");
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showVerificationPrompt, setShowVerificationPrompt] = useState(!profile?.is_verified);
   
   // Profile settings
   const [fullName, setFullName] = useState(profile?.full_name || "");
+  const [institution, setInstitution] = useState(profile?.institution || "");
+  const [bio, setBio] = useState(profile?.bio || "");
   
   // Preferences
   const [emailNotifications, setEmailNotifications] = useState(profile?.preferences?.email_notifications ?? true);
@@ -73,7 +83,11 @@ export function ProfileInterface({ user, profile }: Props) {
 
       const { error } = await supabase
         .from("profiles")
-        .update({ full_name: fullName.trim() })
+        .update({ 
+          full_name: fullName.trim(),
+          institution: institution.trim() || null,
+          bio: bio.trim() || null
+        })
         .eq("id", user.id);
 
       if (error) throw error;
@@ -175,6 +189,13 @@ export function ProfileInterface({ user, profile }: Props) {
           </p>
         </div>
 
+        {/* Verification Prompt for unverified users */}
+        {showVerificationPrompt && (
+          <div className="mb-6">
+            <VerificationPrompt onDismiss={() => setShowVerificationPrompt(false)} />
+          </div>
+        )}
+
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:inline-grid">
@@ -199,13 +220,22 @@ export function ProfileInterface({ user, profile }: Props) {
                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-nasa-blue to-blue-600 text-2xl font-bold text-white">
                   {fullName.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U'}
                 </div>
-                <div>
-                  <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                    {fullName || 'User'}
-                  </h2>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                      {fullName || 'User'}
+                    </h2>
+                    {profile?.is_verified && <VerifiedBadge size="md" />}
+                  </div>
                   <p className="text-sm text-slate-600 dark:text-slate-400">
                     {user.email}
                   </p>
+                  {institution && (
+                    <p className="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-1 mt-1">
+                      <Building2 className="h-3 w-3" />
+                      {institution}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -261,6 +291,47 @@ export function ProfileInterface({ user, profile }: Props) {
                     disabled
                     className="h-11 bg-slate-50 dark:bg-slate-800/50"
                   />
+                </div>
+
+                {/* Institution */}
+                <div>
+                  <Label htmlFor="institution" className="mb-2 flex items-center gap-2 text-sm font-medium">
+                    <Building2 className="h-4 w-4" />
+                    Institution
+                  </Label>
+                  <Input
+                    id="institution"
+                    type="text"
+                    value={institution}
+                    onChange={(e) => setInstitution(e.target.value)}
+                    placeholder="e.g., MIT, NASA, University of Tokyo"
+                    disabled={isUpdating}
+                    className="h-11"
+                  />
+                  <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
+                    Your university or research organization
+                  </p>
+                </div>
+
+                {/* Bio */}
+                <div>
+                  <Label htmlFor="bio" className="mb-2 flex items-center gap-2 text-sm font-medium">
+                    <FileText className="h-4 w-4" />
+                    Bio
+                  </Label>
+                  <Textarea
+                    id="bio"
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    placeholder="Brief description of your research interests..."
+                    disabled={isUpdating}
+                    rows={4}
+                    maxLength={500}
+                    className="resize-none"
+                  />
+                  <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
+                    {bio.length}/500 characters
+                  </p>
                 </div>
 
                 {/* Update Button */}

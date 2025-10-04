@@ -5,6 +5,7 @@ import { createBrowserClient } from "@/lib/supabase/client";
 import { CommunityPost, Tag } from '@/lib/community-types';
 import { PostCard } from './PostCard';
 import { CreatePostButton } from './CreatePostButton';
+import VerificationPrompt from '@/components/verification/VerificationPrompt';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
@@ -22,15 +23,17 @@ type FilterOption = 'all' | 'discussions' | 'questions' | 'insights' | 'followin
 
 interface CommunityPageClientProps {
   userId: string;
+  isVerified: boolean;
 }
 
-export function CommunityPageClient({ userId }: CommunityPageClientProps) {
+export function CommunityPageClient({ userId, isVerified }: CommunityPageClientProps) {
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<SortOption>('recent');
   const [filterBy, setFilterBy] = useState<FilterOption>('all');
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [showVerificationPrompt, setShowVerificationPrompt] = useState(!isVerified);
 
   const supabase = createBrowserClient();
 
@@ -206,6 +209,13 @@ export function CommunityPageClient({ userId }: CommunityPageClientProps) {
         </div>
         <CreatePostButton onPostCreated={handlePostCreated} />
       </div>
+
+      {/* Verification Prompt for unverified users */}
+      {showVerificationPrompt && (
+        <div className="mb-6">
+          <VerificationPrompt onDismiss={() => setShowVerificationPrompt(false)} />
+        </div>
+      )}
 
       {/* Filters and Sorting */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">

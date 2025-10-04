@@ -341,15 +341,15 @@ export function ChatInterface({ userId, onTitleUpdate }: ChatInterfaceProps) {
 
   if (!conversationId) {
     return (
-      <div className="flex flex-1 items-center justify-center p-8">
+      <div className="flex flex-1 items-center justify-center bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 p-8">
         <div className="max-w-2xl text-center">
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-800">
-            <Sparkles className="h-8 w-8 text-nasa-blue" />
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-nasa-blue to-blue-600 shadow-lg shadow-nasa-blue/25">
+            <Sparkles className="h-8 w-8 text-white" />
           </div>
-          <h3 className="mb-3 text-2xl font-semibold text-slate-900 dark:text-white">
+          <h3 className="mb-3 text-2xl font-bold text-slate-900 dark:text-white">
             Welcome to ExoBioGraph
           </h3>
-          <p className="mb-6 text-[15px] leading-7 text-slate-600 dark:text-slate-400">
+          <p className="mb-8 text-base leading-relaxed text-slate-600 dark:text-slate-400 max-w-lg mx-auto">
             Your AI assistant for exploring NASA&apos;s space biology research.
             Ask questions about organisms, experimental conditions, biological
             effects, and scientific endpoints from real research data.
@@ -357,7 +357,7 @@ export function ChatInterface({ userId, onTitleUpdate }: ChatInterfaceProps) {
           <Button
             onClick={handleNewChat}
             size="lg"
-            className="mb-8 bg-nasa-blue hover:bg-nasa-blue/90"
+            className="mb-10 bg-nasa-blue hover:bg-nasa-blue/90 shadow-lg shadow-nasa-blue/25 hover:shadow-xl hover:shadow-nasa-blue/30 transition-all"
           >
             <MessageSquarePlus className="mr-2 h-5 w-5" />
             Start New Chat
@@ -367,9 +367,9 @@ export function ChatInterface({ userId, onTitleUpdate }: ChatInterfaceProps) {
               <button
                 key={index}
                 onClick={() => handleTemplateQuestion(question)}
-                className="group rounded-lg border border-slate-200 bg-white p-4 text-left transition-all hover:border-nasa-blue hover:shadow-md active:scale-95 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:border-nasa-blue"
+                className="group rounded-xl border border-slate-200 bg-white p-4 text-left transition-all hover:border-nasa-blue hover:shadow-lg hover:shadow-slate-900/5 active:scale-[0.98] dark:border-slate-700 dark:bg-slate-800/50 dark:hover:border-blue-500"
               >
-                <p className="text-sm font-medium text-slate-900 group-hover:text-nasa-blue dark:text-white dark:group-hover:text-blue-400 transition-colors">
+                <p className="text-sm font-medium text-slate-900 group-hover:text-nasa-blue dark:text-white dark:group-hover:text-blue-400 transition-colors leading-relaxed">
                   {question}
                 </p>
               </button>
@@ -381,17 +381,17 @@ export function ChatInterface({ userId, onTitleUpdate }: ChatInterfaceProps) {
   }
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
+    <div className="flex flex-1 flex-col overflow-hidden bg-white dark:bg-slate-900">
       {/* Messages Area - Scrollable */}
-      <ScrollArea ref={scrollAreaRef} className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-3xl space-y-6 p-4 pb-6">
+      <ScrollArea ref={scrollAreaRef} className="flex-1 overflow-y-auto bg-gradient-to-b from-white to-slate-50/30 dark:from-slate-900 dark:to-slate-950/30">
+        <div className="mx-auto max-w-3xl space-y-6 p-6 pb-8">
           {messages.length === 0 ? (
             <div className="py-20 text-center">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800">
-                <Bot className="h-6 w-6 text-slate-600 dark:text-slate-400" />
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700">
+                <Bot className="h-7 w-7 text-slate-600 dark:text-slate-400" />
               </div>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                How can I help you explore space biology research?
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                How can I help you explore space biology research today?
               </p>
             </div>
           ) : (
@@ -402,16 +402,21 @@ export function ChatInterface({ userId, onTitleUpdate }: ChatInterfaceProps) {
                   message.role === "user" ? "justify-end" : "justify-start"
                 }`}
               >
-                <div className={`flex flex-col gap-2 max-w-[85%] ${message.role === "user" ? "items-end" : "items-start"}`}>
+                {message.role === "assistant" && (
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-nasa-blue to-blue-600 shadow-sm">
+                    <Bot className="h-5 w-5 text-white" />
+                  </div>
+                )}
+                <div className={`flex flex-col gap-2 max-w-[80%] ${message.role === "user" ? "items-end" : "items-start"}`}>
                   <div
                     className={`${
                       message.role === "user"
-                        ? "rounded-2xl bg-nasa-blue px-5 py-3 text-white"
-                        : "space-y-3"
+                        ? "rounded-2xl rounded-tr-md bg-gradient-to-br from-nasa-blue to-blue-600 px-5 py-3.5 text-white shadow-lg shadow-nasa-blue/20"
+                        : "space-y-3 rounded-2xl rounded-tl-md bg-white px-5 py-4 shadow-sm border border-slate-200 dark:border-slate-700 dark:bg-slate-800/50"
                     }`}
                   >
-                    <p className={`whitespace-pre-wrap leading-6 ${
-                      message.role === "user" ? "text-sm" : "text-sm text-slate-900 dark:text-slate-100"
+                    <p className={`whitespace-pre-wrap leading-7 ${
+                      message.role === "user" ? "text-[15px]" : "text-[15px] text-slate-900 dark:text-slate-100"
                     }`}>
                       {message.content}
                     </p>
@@ -423,7 +428,7 @@ export function ChatInterface({ userId, onTitleUpdate }: ChatInterfaceProps) {
                           <Badge
                             key={idx}
                             variant="outline"
-                            className="rounded-md border-slate-300 bg-white text-xs font-normal text-slate-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                            className="rounded-lg border-slate-300 bg-slate-50 text-xs font-normal text-slate-700 dark:border-slate-600 dark:bg-slate-700/50 dark:text-slate-300"
                           >
                             {entity}
                           </Badge>
@@ -433,11 +438,12 @@ export function ChatInterface({ userId, onTitleUpdate }: ChatInterfaceProps) {
 
                     {/* Sources */}
                     {message.sources && message.sources.length > 0 && (
-                      <div className="mt-4 space-y-1.5 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-800/50">
-                        <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                      <div className="mt-4 space-y-2 rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 dark:border-slate-600 dark:bg-slate-700/30">
+                        <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                          <span className="inline-block h-1 w-1 rounded-full bg-nasa-blue"></span>
                           Sources
                         </p>
-                        <div className="space-y-1">
+                        <div className="space-y-1.5">
                           {message.sources.map((source, idx) => (
                             <p
                               key={idx}
@@ -451,10 +457,10 @@ export function ChatInterface({ userId, onTitleUpdate }: ChatInterfaceProps) {
                     )}
                   </div>
 
-                  {/* Copy button - outside message card, like Claude */}
+                  {/* Copy button */}
                   <button
                     onClick={() => copyMessageContent(message.content, message.id)}
-                    className="flex items-center gap-1.5 px-2 py-1 text-xs transition-opacity opacity-0 group-hover:opacity-100 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 rounded hover:bg-slate-100 dark:hover:bg-slate-800"
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs transition-all opacity-0 group-hover:opacity-100 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
                     aria-label="Copy message"
                   >
                     {copiedMessageId === message.id ? (
@@ -476,13 +482,13 @@ export function ChatInterface({ userId, onTitleUpdate }: ChatInterfaceProps) {
 
           {isLoading && (
             <div className="flex justify-start gap-4">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800">
-                <Bot className="h-4 w-4 text-slate-700 dark:text-slate-300" />
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-nasa-blue to-blue-600 shadow-sm">
+                <Bot className="h-5 w-5 text-white" />
               </div>
-              <div className="flex items-center gap-1.5 py-3">
-                <div className="h-2 w-2 animate-bounce rounded-full bg-slate-400 dark:bg-slate-500" />
-                <div className="h-2 w-2 animate-bounce rounded-full bg-slate-400 dark:bg-slate-500 [animation-delay:0.2s]" />
-                <div className="h-2 w-2 animate-bounce rounded-full bg-slate-400 dark:bg-slate-500 [animation-delay:0.4s]" />
+              <div className="flex items-center gap-2 rounded-2xl rounded-tl-md bg-white px-5 py-4 shadow-sm border border-slate-200 dark:border-slate-700 dark:bg-slate-800/50">
+                <div className="h-2 w-2 animate-bounce rounded-full bg-nasa-blue dark:bg-blue-400" />
+                <div className="h-2 w-2 animate-bounce rounded-full bg-nasa-blue dark:bg-blue-400 [animation-delay:0.2s]" />
+                <div className="h-2 w-2 animate-bounce rounded-full bg-nasa-blue dark:bg-blue-400 [animation-delay:0.4s]" />
               </div>
             </div>
           )}
@@ -495,7 +501,7 @@ export function ChatInterface({ userId, onTitleUpdate }: ChatInterfaceProps) {
       {showScrollButton && (
         <button
           onClick={scrollToBottom}
-          className="absolute bottom-32 right-8 z-10 rounded-full bg-nasa-blue p-3 shadow-lg transition-all hover:bg-nasa-blue/90 hover:shadow-xl dark:bg-nasa-blue dark:hover:bg-nasa-blue/80"
+          className="absolute bottom-36 right-8 z-10 rounded-xl bg-gradient-to-br from-nasa-blue to-blue-600 p-3 shadow-lg shadow-nasa-blue/25 transition-all hover:shadow-xl hover:shadow-nasa-blue/30 hover:scale-105 active:scale-95"
           aria-label="Scroll to bottom"
         >
           <ArrowDown className="h-5 w-5 text-white" />
@@ -503,22 +509,22 @@ export function ChatInterface({ userId, onTitleUpdate }: ChatInterfaceProps) {
       )}
 
       {/* Input Area - Fixed at bottom, no scroll */}
-      <div className="flex-shrink-0 border-t border-slate-200 p-4 dark:border-slate-800">
+      <div className="flex-shrink-0 border-t border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 p-4 shadow-lg">
         <div className="mx-auto max-w-3xl">
           {/* Error Banner */}
           {error && (
-            <div className="mb-4 flex items-start gap-3 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-300">
+            <div className="mb-4 flex items-start gap-3 rounded-xl bg-red-50 px-4 py-3.5 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-300 border border-red-100 dark:border-red-900/30">
               <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
               <div className="flex-1">
-                <p className="font-medium">Error</p>
-                <p className="mt-0.5 text-sm">{error}</p>
+                <p className="font-semibold">Error</p>
+                <p className="mt-1 text-sm">{error}</p>
               </div>
               <button
                 onClick={() => setError(null)}
-                className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors"
                 aria-label="Dismiss error"
               >
-                ✕
+                <X className="h-4 w-4" />
               </button>
             </div>
           )}
@@ -529,18 +535,18 @@ export function ChatInterface({ userId, onTitleUpdate }: ChatInterfaceProps) {
               {uploadedFiles.map((file, index) => (
                 <div
                   key={index}
-                  className="flex items-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-sm dark:bg-slate-800"
+                  className="flex items-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-sm dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
                 >
-                  <FileText className="h-4 w-4 text-slate-600 dark:text-slate-400" />
-                  <span className="text-slate-900 dark:text-slate-100">
+                  <FileText className="h-4 w-4 text-nasa-blue dark:text-blue-400" />
+                  <span className="text-slate-900 dark:text-slate-100 font-medium">
                     {file.name}
                   </span>
-                  <span className="text-xs text-slate-500">
+                  <span className="text-xs text-slate-500 dark:text-slate-400">
                     ({(file.size / 1024).toFixed(1)} KB)
                   </span>
                   <button
                     onClick={() => removeFile(index)}
-                    className="ml-1 rounded p-0.5 hover:bg-slate-200 dark:hover:bg-slate-700"
+                    className="ml-1 rounded-md p-1 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                     aria-label="Remove file"
                   >
                     <X className="h-3.5 w-3.5 text-slate-600 dark:text-slate-400" />
@@ -568,10 +574,10 @@ export function ChatInterface({ userId, onTitleUpdate }: ChatInterfaceProps) {
               disabled={isLoading || isParsingFiles}
               size="icon"
               variant="ghost"
-              className="h-[44px] w-[44px] shrink-0 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="h-11 w-11 shrink-0 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               aria-label="Attach file"
             >
-              <Paperclip className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+              <Paperclip className="h-5 w-5 text-slate-600 dark:text-slate-400" />
             </Button>
             
             <div className="relative flex-1">
@@ -581,7 +587,7 @@ export function ChatInterface({ userId, onTitleUpdate }: ChatInterfaceProps) {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyPress}
                 placeholder="Message ExoBioGraph..."
-                className="max-h-[200px] min-h-[52px] w-full resize-none rounded-3xl border-0 bg-white px-5 py-3.5 pr-12 text-[15px] shadow-lg shadow-slate-900/5 ring-1 ring-slate-900/10 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-nasa-blue dark:bg-slate-800 dark:shadow-slate-950/50 dark:ring-slate-700 dark:placeholder:text-slate-500 dark:focus:ring-blue-500"
+                className="max-h-[200px] min-h-[56px] w-full resize-none rounded-2xl border-0 bg-slate-50 px-5 py-4 pr-12 text-[15px] shadow-sm ring-1 ring-slate-200 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-nasa-blue focus:bg-white dark:bg-slate-800 dark:ring-slate-700 dark:placeholder:text-slate-500 dark:focus:ring-blue-500 dark:focus:bg-slate-800/80 transition-all"
                 disabled={isLoading}
                 aria-label="Message input"
               />
@@ -590,10 +596,10 @@ export function ChatInterface({ userId, onTitleUpdate }: ChatInterfaceProps) {
               onClick={handleSendMessage}
               disabled={(!input.trim() && uploadedFiles.length === 0) || isLoading || isParsingFiles}
               size="icon"
-              className="h-[44px] w-[44px] shrink-0 rounded-full bg-nasa-blue shadow-lg shadow-nasa-blue/25 hover:bg-nasa-blue/90 hover:shadow-xl hover:shadow-nasa-blue/30 disabled:bg-slate-200 disabled:shadow-none dark:disabled:bg-slate-700 transition-all"
+              className="h-11 w-11 shrink-0 rounded-xl bg-gradient-to-br from-nasa-blue to-blue-600 shadow-md shadow-nasa-blue/25 hover:shadow-lg hover:shadow-nasa-blue/30 hover:scale-105 disabled:bg-slate-200 disabled:shadow-none disabled:scale-100 dark:disabled:bg-slate-700 transition-all duration-200"
               aria-label="Send message"
             >
-              <Send className="h-4 w-4" />
+              <Send className="h-5 w-5" />
             </Button>
           </div>
           <p className="mt-3 text-center text-xs text-slate-500 dark:text-slate-400">
