@@ -25,10 +25,21 @@ export default async function ProfilePage() {
     .eq("id", user.id)
     .single();
 
+  // Get follower and following counts
+  const { data: followerCount } = await supabase.rpc("get_follower_count", {
+    user_id: user.id,
+  });
+
+  const { data: followingCount } = await supabase.rpc("get_following_count", {
+    user_id: user.id,
+  });
+
   return (
     <ProfileInterface
       user={user}
       profile={profile}
+      followerCount={followerCount || 0}
+      followingCount={followingCount || 0}
     />
   );
 }

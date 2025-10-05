@@ -10,9 +10,9 @@ export default async function LoginPage() {
   const supabase = await createServerClient();
   const { data: { session } } = await supabase.auth.getSession();
 
-  // If already logged in, redirect to chat
+  // If already logged in, redirect to search
   if (session) {
-    redirect('/chat');
+    redirect('/search');
   }
 
   return (

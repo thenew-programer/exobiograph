@@ -1,0 +1,1 @@
+export { PeopleSearchInterface } from './PeopleSearchInterface';

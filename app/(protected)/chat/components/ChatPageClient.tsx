@@ -10,9 +10,13 @@ import type { Conversation } from "@/lib/conversations";
 type ChatPageClientProps = {
   conversations: Conversation[];
   userId: string;
+  userProfile: {
+    avatar_url?: string;
+    full_name?: string;
+  } | null;
 };
 
-export function ChatPageClient({ conversations, userId }: ChatPageClientProps) {
+export function ChatPageClient({ conversations, userId, userProfile }: ChatPageClientProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
@@ -40,7 +44,10 @@ export function ChatPageClient({ conversations, userId }: ChatPageClientProps) {
           </Button>
         )}
         
-        <ChatInterface userId={userId} />
+        <ChatInterface 
+          userId={userId} 
+          userProfile={userProfile}
+        />
       </div>
     </div>
   );

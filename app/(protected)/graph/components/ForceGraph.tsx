@@ -119,7 +119,7 @@ export function ForceGraph({ selectedCategories }: Props) {
     feMerge.append("feMergeNode").attr("in", "SourceGraphic");
 
     // Radial gradients for nodes
-    ["organism", "condition", "effect", "endpoint"].forEach(type => {
+    ["sample", "conditions", "result", "objective", "entity"].forEach(type => {
       const gradient = defs.append("radialGradient")
         .attr("id", `gradient-${type}`);
       
@@ -215,24 +215,20 @@ export function ForceGraph({ selectedCategories }: Props) {
       .attr("opacity", 0.2)
       .attr("filter", "url(#glow)");
 
-    // Inner circle with gradient
+    // Invisible larger click area for easier interaction
     node
       .append("circle")
-      .attr("class", "node-core")
-      .attr("r", (d) => Math.sqrt(d.frequency) * 3 + 8)
-      .attr("fill", (d) => `url(#gradient-${d.type})`)
-      .attr("stroke", (d) => getNodeColor(d.type))
-      .attr("stroke-width", 2)
-      .attr("stroke-opacity", 0.8)
+      .attr("class", "node-click-area")
+      .attr("r", (d) => Math.sqrt(d.frequency) * 5 + 20)
+      .attr("fill", "transparent")
       .style("cursor", "pointer")
-      .style("filter", "drop-shadow(0 0 8px rgba(99, 102, 241, 0.4))")
       .on("click", (event: MouseEvent, d: SimulationNode) => {
         event.stopPropagation();
         setSelectedNode(d);
       })
       .on("mouseenter", function(event: MouseEvent, d: SimulationNode) {
         setHoveredNode(d);
-        d3.select(this)
+        d3.select((this as SVGElement).parentNode as SVGElement).select(".node-core")
           .transition()
           .duration(200)
           .attr("stroke-width", 3)
@@ -249,7 +245,7 @@ export function ForceGraph({ selectedCategories }: Props) {
       })
       .on("mouseleave", function(event: MouseEvent, d: SimulationNode) {
         setHoveredNode(null);
-        d3.select(this)
+        d3.select((this as SVGElement).parentNode as SVGElement).select(".node-core")
           .transition()
           .duration(200)
           .attr("stroke-width", 2)
@@ -264,6 +260,18 @@ export function ForceGraph({ selectedCategories }: Props) {
         // Reset highlights
         resetHighlights();
       });
+
+    // Inner circle with gradient (visual only, no events)
+    node
+      .append("circle")
+      .attr("class", "node-core")
+      .attr("r", (d) => Math.sqrt(d.frequency) * 3 + 8)
+      .attr("fill", (d) => `url(#gradient-${d.type})`)
+      .attr("stroke", (d) => getNodeColor(d.type))
+      .attr("stroke-width", 2)
+      .attr("stroke-opacity", 0.8)
+      .style("pointer-events", "none")
+      .style("filter", "drop-shadow(0 0 8px rgba(99, 102, 241, 0.4))");
 
     // Node labels with better styling
     node
@@ -445,7 +453,7 @@ export function ForceGraph({ selectedCategories }: Props) {
   return (
     <div className="relative h-full w-full bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 overflow-hidden">
       {/* Animated background grid */}
-      <div className="absolute inset-0 opacity-20">
+      <div className="absolute inset-0 opacity-20 pointer-events-none">
         <div className="absolute inset-0" style={{
           backgroundImage: `
             linear-gradient(rgba(99, 102, 241, 0.1) 1px, transparent 1px),
@@ -456,9 +464,9 @@ export function ForceGraph({ selectedCategories }: Props) {
       </div>
 
       {/* Radial gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-radial from-transparent via-slate-900/50 to-slate-950"></div>
+      <div className="absolute inset-0 bg-gradient-radial from-transparent via-slate-900/50 to-slate-950 pointer-events-none"></div>
 
-      <svg ref={svgRef} className="h-full w-full relative z-10" />
+      <svg ref={svgRef} className="h-full w-full relative z-0" style={{ pointerEvents: 'auto' }} />
 
       {/* Hover tooltip */}
       {hoveredNode && (
@@ -478,38 +486,40 @@ export function ForceGraph({ selectedCategories }: Props) {
 
       {/* Node details panel */}
       {selectedNode && (
-        <div className="absolute right-4 top-4 max-h-[calc(100vh-8rem)] w-96 overflow-y-auto rounded-xl border border-indigo-500/30 bg-slate-900/95 backdrop-blur-xl p-6 shadow-2xl">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <div 
-                className="h-3 w-3 rounded-full"
-                style={{ 
-                  backgroundColor: getNodeColor(selectedNode.type),
-                  boxShadow: `0 0 12px ${getNodeColor(selectedNode.type)}`
-                }}
-              />
-              Entity Details
-            </h3>
-            <button
-              onClick={() => setSelectedNode(null)}
-              className="text-slate-400 hover:text-white transition-colors"
-            >
-              ✕
-            </button>
+        <div className="absolute right-4 top-16 bottom-16 w-96 flex flex-col rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl z-50 pointer-events-auto">
+          <div className="flex-shrink-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <div 
+                  className="h-3 w-3 rounded-full"
+                  style={{ 
+                    backgroundColor: getNodeColor(selectedNode.type),
+                    boxShadow: `0 0 12px ${getNodeColor(selectedNode.type)}`
+                  }}
+                />
+                Entity Details
+              </h3>
+              <button
+                onClick={() => setSelectedNode(null)}
+                className="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded"
+              >
+                ✕
+              </button>
+            </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
             <div>
-              <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-1">
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">
                 Name
               </p>
-              <p className="text-base font-medium text-white">
+              <p className="text-base font-medium text-slate-900 dark:text-white">
                 {selectedNode.label}
               </p>
             </div>
 
             <div>
-              <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-1">
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">
                 Type
               </p>
               <span
@@ -529,10 +539,10 @@ export function ForceGraph({ selectedCategories }: Props) {
             </div>
 
             <div>
-              <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-1">
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">
                 Frequency
               </p>
-              <p className="text-sm text-slate-300">
+              <p className="text-sm text-slate-700 dark:text-slate-300">
                 Appears in {selectedNode.frequency} paper{selectedNode.frequency !== 1 ? "s" : ""}
               </p>
             </div>
@@ -540,7 +550,7 @@ export function ForceGraph({ selectedCategories }: Props) {
             {/* Research Papers */}
             {selectedNode.papers && selectedNode.papers.length > 0 && (
               <div>
-                <p className="mb-3 text-xs font-medium text-slate-400 uppercase tracking-wide">
+                <p className="mb-3 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">
                   Research Papers ({selectedNode.papers.length})
                 </p>
                 <div className="space-y-2">
@@ -551,32 +561,30 @@ export function ForceGraph({ selectedCategories }: Props) {
                       : String(paper.authors);
                     
                     return (
-                      <div
+                      <a
                         key={paper.id}
-                        className="group rounded-lg border border-slate-700/50 bg-slate-800/30 p-3 hover:border-indigo-500/30 hover:bg-slate-800/50 transition-all"
+                        href={paper.source_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block group rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/30 p-3 hover:border-blue-300 dark:hover:border-indigo-500/30 hover:bg-blue-50 dark:hover:bg-slate-800/50 transition-all cursor-pointer"
                       >
-                        <h4 className="mb-1.5 text-sm font-medium text-white leading-snug">
+                        <h4 className="mb-1.5 text-sm font-medium text-slate-900 dark:text-white leading-snug group-hover:text-blue-600 dark:group-hover:text-indigo-400 transition-colors">
                           {paper.title}
                         </h4>
-                        <p className="mb-2 text-xs text-slate-400">
+                        <p className="mb-2 text-xs text-slate-600 dark:text-slate-400">
                           {authors.length > 50 ? authors.substring(0, 50) + "..." : authors} • {year}
                         </p>
-                        <a
-                          href={paper.source_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
-                        >
+                        <span className="inline-flex items-center gap-1 text-xs text-blue-600 dark:text-indigo-400 group-hover:gap-2 transition-all">
                           View Paper
-                          <svg className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                           </svg>
-                        </a>
-                      </div>
+                        </span>
+                      </a>
                     );
                   })}
                   {selectedNode.papers.length > 10 && (
-                    <p className="text-xs text-slate-500 text-center py-2">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 text-center py-2">
                       + {selectedNode.papers.length - 10} more papers
                     </p>
                   )}
@@ -587,32 +595,23 @@ export function ForceGraph({ selectedCategories }: Props) {
         </div>
       )}
 
-      {/* Legend */}
-      <div className="absolute bottom-4 left-4 rounded-xl border border-indigo-500/30 bg-slate-900/95 backdrop-blur-xl p-4 shadow-2xl">
-        <h4 className="mb-3 text-sm font-bold text-white">
-          Legend
-        </h4>
-        <div className="space-y-2">
+      {/* Compact Legend */}
+      <div className="absolute bottom-3 left-3 rounded-lg border border-slate-700/50 bg-slate-900/90 backdrop-blur-md px-3 py-2 shadow-lg">
+        <div className="flex items-center gap-3">
           {(["sample", "conditions", "result", "objective", "entity"] as EntityType[]).map((type) => (
-            <div key={type} className="flex items-center gap-2.5">
+            <div key={type} className="flex items-center gap-1.5">
               <div
-                className="h-3 w-3 rounded-full"
+                className="h-2 w-2 rounded-full"
                 style={{ 
                   backgroundColor: getNodeColor(type),
-                  boxShadow: `0 0 8px ${getNodeColor(type)}`
+                  boxShadow: `0 0 4px ${getNodeColor(type)}`
                 }}
               />
-              <span className="text-sm text-slate-300 font-medium">
+              <span className="text-xs text-slate-300">
                 {type.charAt(0).toUpperCase() + type.slice(1)}
               </span>
             </div>
           ))}
-        </div>
-        <div className="mt-4 border-t border-slate-700 pt-3 space-y-1 text-xs text-slate-400">
-          <p>• <span className="text-slate-300">Node size</span> = frequency</p>
-          <p>• <span className="text-slate-300">Edge width</span> = strength</p>
-          <p>• <span className="text-slate-300">Drag</span> to rearrange</p>
-          <p>• <span className="text-slate-300">Scroll</span> to zoom</p>
         </div>
       </div>
     </div>

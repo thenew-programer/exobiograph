@@ -26,12 +26,12 @@ export async function middleware(request: NextRequest) {
   );
 
   if (isAuthPath && session) {
-    return NextResponse.redirect(new URL('/chat', request.url));
+    return NextResponse.redirect(new URL('/search', request.url));
   }
 
-  // Redirect authenticated users from home page to chat
+  // Redirect authenticated users from home page to search
   if (request.nextUrl.pathname === '/' && session) {
-    return NextResponse.redirect(new URL('/chat', request.url));
+    return NextResponse.redirect(new URL('/search', request.url));
   }
 
   return NextResponse.next();

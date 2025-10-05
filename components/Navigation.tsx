@@ -56,32 +56,17 @@ export function Navigation() {
               About
               <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-nasa-blue transition-all group-hover:w-full" />
             </Link>
-            <Link 
-              href="/#how-it-works" 
-              className="group relative text-sm font-medium text-slate-600 hover:text-nasa-blue dark:text-slate-300 dark:hover:text-blue-400 transition-colors"
-            >
-              How It Works
-              <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-nasa-blue transition-all group-hover:w-full" />
-            </Link>
-            <a 
-              href="https://github.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="group flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-nasa-blue dark:text-slate-300 dark:hover:text-blue-400 transition-colors"
-            >
-              <Github className="h-4 w-4" />
-              GitHub
-            </a>
+
           </div>
 
           {/* Desktop Auth Buttons */}
           <div className="hidden md:flex items-center gap-3">
-            <Button asChild variant="ghost" className="font-medium">
+            <Button asChild variant="ghost" className="font-medium hover:bg-slate-100 dark:hover:bg-slate-800">
               <Link href="/login">Sign In</Link>
             </Button>
-            <Button asChild className="group bg-gradient-to-r from-nasa-blue to-blue-600 hover:from-nasa-blue/90 hover:to-blue-600/90 font-medium shadow-md hover:shadow-lg transition-all">
-              <Link href="/signup">
-                <Sparkles className="mr-2 h-4 w-4 group-hover:rotate-12 transition-transform" />
+            <Button asChild className="group bg-gradient-to-r from-[#2a5298] to-[#3a62a8] hover:from-[#1e3a6f] hover:to-[#2a5298] text-white font-medium shadow-md hover:shadow-lg transition-all">
+              <Link href="/signup" className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4" />
                 Get Started
               </Link>
             </Button>
@@ -118,15 +103,8 @@ export function Navigation() {
             >
               About
             </Link>
-            <Link 
-              href="/#how-it-works" 
-              className="block rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-nasa-blue dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-blue-400 transition-colors"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              How It Works
-            </Link>
             <a 
-              href="https://github.com" 
+              href="https://github.com/thenew-programer/exobiograph" 
               target="_blank" 
               rel="noopener noreferrer"
               className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-nasa-blue dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-blue-400 transition-colors"
@@ -138,9 +116,9 @@ export function Navigation() {
               <Button asChild variant="outline" className="w-full font-medium">
                 <Link href="/login">Sign In</Link>
               </Button>
-              <Button asChild className="w-full bg-gradient-to-r from-nasa-blue to-blue-600 hover:from-nasa-blue/90 hover:to-blue-600/90 font-medium">
-                <Link href="/signup">
-                  <Sparkles className="mr-2 h-4 w-4" />
+              <Button asChild className="w-full bg-gradient-to-r from-[#2a5298] to-[#3a62a8] hover:from-[#1e3a6f] hover:to-[#2a5298] font-medium shadow-md">
+                <Link href="/signup" className="flex items-center justify-center gap-2">
+                  <Sparkles className="h-4 w-4" />
                   Get Started
                 </Link>
               </Button>

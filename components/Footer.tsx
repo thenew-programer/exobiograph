@@ -22,7 +22,7 @@ export function Footer() {
             </p>
             <div className="flex gap-4">
               <a
-                href="https://github.com"
+                href="https://github.com/thenew-programer/exobiograph"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-slate-600 hover:text-[#2a5298] dark:text-slate-400 dark:hover:text-[#4a72b8] transition-colors"

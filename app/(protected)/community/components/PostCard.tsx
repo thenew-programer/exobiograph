@@ -172,12 +172,18 @@ export function PostCard({ post, currentUserId, onUpdate }: PostCardProps) {
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-start gap-3 flex-1 min-w-0">
               {/* Author Avatar */}
-              <Avatar className="h-10 w-10 flex-shrink-0">
-                <AvatarImage src={post.author?.avatar_url} alt={post.author?.full_name} />
-                <AvatarFallback>
-                  {post.author?.full_name?.charAt(0) || 'U'}
-                </AvatarFallback>
-              </Avatar>
+              <Link 
+                href={`/profile/${post.author_id}`}
+                onClick={(e) => e.stopPropagation()}
+                className="flex-shrink-0 hover:opacity-80 transition-opacity"
+              >
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={post.author?.avatar_url} alt={post.author?.full_name} />
+                  <AvatarFallback>
+                    {post.author?.full_name?.charAt(0) || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+              </Link>
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">

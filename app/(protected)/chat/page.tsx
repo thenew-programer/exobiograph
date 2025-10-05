@@ -35,10 +35,18 @@ export default async function ChatPage() {
 
   const conversations = await getConversations(user.id);
 
+  // Fetch user profile for avatar
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('avatar_url, full_name')
+    .eq('id', user.id)
+    .single();
+
   return (
     <ChatPageClient 
       conversations={conversations}
       userId={user.id}
+      userProfile={profile}
     />
   );
 }

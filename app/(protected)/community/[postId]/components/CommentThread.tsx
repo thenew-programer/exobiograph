@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { CommunityComment } from '@/lib/community-types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -155,12 +156,17 @@ export function CommentThread({
       <Card className={depth > 0 ? "border-l-2" : ""}>
         <CardContent className="py-4">
           <div className="flex items-start gap-3">
-            <Avatar className="h-8 w-8 flex-shrink-0">
-              <AvatarImage src={comment.author?.avatar_url} alt={comment.author?.full_name} />
-              <AvatarFallback>
-                {comment.author?.full_name?.charAt(0) || 'U'}
-              </AvatarFallback>
-            </Avatar>
+            <Link 
+              href={`/profile/${comment.author_id}`}
+              className="flex-shrink-0 hover:opacity-80 transition-opacity"
+            >
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={comment.author?.avatar_url} alt={comment.author?.full_name} />
+                <AvatarFallback>
+                  {comment.author?.full_name?.charAt(0) || 'U'}
+                </AvatarFallback>
+              </Avatar>
+            </Link>
 
             <div className="flex-1 min-w-0 space-y-2">
               <div className="flex items-center justify-between gap-2">

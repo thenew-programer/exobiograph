@@ -1,10 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { MessageSquarePlus, Trash2, PanelLeftClose } from "lucide-react";
+import { MessageSquarePlus, Trash2, PanelLeftClose, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
   type Conversation,
@@ -32,6 +40,14 @@ export function ConversationSidebar({
   
   const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
   const [isCreating, setIsCreating] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [conversationToDelete, setConversationToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Sync with initial conversations when they change
+  useEffect(() => {
+    setConversations(initialConversations);
+  }, [initialConversations]);
 
   const handleNewConversation = async () => {
     setIsCreating(true);
@@ -54,24 +70,36 @@ export function ConversationSidebar({
   };
 
   const handleDeleteConversation = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this conversation?')) return;
+    setConversationToDelete(id);
+    setDeleteDialogOpen(true);
+  };
 
+  const confirmDelete = async () => {
+    if (!conversationToDelete) return;
+
+    setIsDeleting(true);
     try {
-      const success = await deleteConv(id);
+      const success = await deleteConv(conversationToDelete);
       if (!success) {
         toast.error("Failed to delete conversation");
+        setIsDeleting(false);
         return;
       }
 
-      setConversations(conversations.filter(c => c.id !== id));
+      setConversations(conversations.filter(c => c.id !== conversationToDelete));
       toast.success("Conversation deleted");
       
-      if (conversationId === id) {
+      if (conversationId === conversationToDelete) {
         router.push('/chat');
       }
+
+      setDeleteDialogOpen(false);
+      setConversationToDelete(null);
     } catch (error) {
       console.error('Error deleting conversation:', error);
       toast.error("Failed to delete conversation");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -87,7 +115,7 @@ export function ConversationSidebar({
       >
         <div className="flex h-full w-80 flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 px-4 py-3.5">
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 px-4 py-3">
             <h2 className="text-sm font-semibold text-slate-900 dark:text-white">
               Conversations
             </h2>
@@ -97,16 +125,20 @@ export function ConversationSidebar({
                 disabled={isCreating}
                 size="sm"
                 variant="ghost"
-                className="h-8 w-8 p-0 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
+                className="h-8 w-8 p-0 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-nasa-blue dark:hover:text-blue-400 transition-colors"
                 aria-label="New conversation"
               >
-                <MessageSquarePlus className="h-4 w-4" />
+                {isCreating ? (
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-nasa-blue dark:border-slate-600 dark:border-t-blue-400" />
+                ) : (
+                  <MessageSquarePlus className="h-4 w-4" />
+                )}
               </Button>
               <Button
                 onClick={onToggleCollapse}
                 size="sm"
                 variant="ghost"
-                className="h-8 w-8 p-0 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
+                className="h-8 w-8 p-0 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
                 aria-label="Collapse sidebar"
               >
                 <PanelLeftClose className="h-4 w-4" />
@@ -117,22 +149,33 @@ export function ConversationSidebar({
           {/* Conversations List */}
           <ScrollArea className="flex-1">
             {conversations.length === 0 ? (
-              <div className="p-8 text-center">
-                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700">
-                  <MessageSquarePlus className="h-6 w-6 text-slate-600 dark:text-slate-400" />
+              <div className="flex flex-col items-center justify-center p-8 text-center h-full min-h-[200px]">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-nasa-blue/10 to-blue-500/10 dark:from-blue-500/20 dark:to-blue-600/20">
+                  <MessageSquarePlus className="h-8 w-8 text-nasa-blue dark:text-blue-400" />
                 </div>
-                <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 font-medium">
+                <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">
                   No conversations yet
+                </h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 max-w-[200px]">
+                  Start a new conversation to begin chatting
                 </p>
                 <Button
                   onClick={handleNewConversation}
                   disabled={isCreating}
-                  variant="outline"
                   size="sm"
-                  className="hover:bg-nasa-blue/10 hover:text-nasa-blue hover:border-nasa-blue dark:hover:bg-blue-500/10 dark:hover:text-blue-400 dark:hover:border-blue-500 transition-all"
+                  className="bg-nasa-blue hover:bg-nasa-blue/90 text-white"
                 >
-                  <MessageSquarePlus className="mr-2 h-4 w-4" />
-                  Start chatting
+                  {isCreating ? (
+                    <>
+                      <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                      Creating...
+                    </>
+                  ) : (
+                    <>
+                      <MessageSquarePlus className="mr-2 h-4 w-4" />
+                      New Conversation
+                    </>
+                  )}
                 </Button>
               </div>
             ) : (
@@ -141,64 +184,77 @@ export function ConversationSidebar({
                   <div
                     key={conversation.id}
                     className={`
-                      group relative flex items-start gap-3 rounded-xl px-3 py-3
-                      transition-all cursor-pointer
+                      group relative flex items-start gap-3 rounded-lg px-3 py-2.5
+                      transition-all duration-150 cursor-pointer
                       ${conversationId === conversation.id
-                        ? 'bg-nasa-blue/10 dark:bg-blue-500/10 border border-nasa-blue/20 dark:border-blue-500/20'
-                        : 'hover:bg-slate-50 dark:hover:bg-slate-800/50 border border-transparent'
+                        ? 'bg-nasa-blue/10 dark:bg-blue-500/10 shadow-sm'
+                        : 'hover:bg-slate-100 dark:hover:bg-slate-800/70'
                       }
                     `}
                     onClick={() => {
                       router.push(`/chat?id=${conversation.id}`);
                     }}
                   >
-                    <div className="flex-1 min-w-0">
-                      <p className={`truncate text-sm font-medium ${
+                    <div className="flex-1 min-w-0 py-0.5">
+                      <p className={`truncate text-sm font-medium leading-tight mb-1.5 ${
                         conversationId === conversation.id
                           ? 'text-nasa-blue dark:text-blue-400'
-                          : 'text-slate-900 dark:text-white'
+                          : 'text-slate-900 dark:text-slate-100'
                       }`}>
                         {conversation.title}
                       </p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                        {formatConversationDate(conversation.updated_at)}
-                      </p>
+                      <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                        <Clock className="h-3 w-3" />
+                        <span>{formatConversationDate(conversation.updated_at)}</span>
+                      </div>
                     </div>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg"
+                      className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-600 dark:hover:text-red-400"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDeleteConversation(conversation.id);
                       }}
+                      aria-label="Delete conversation"
                     >
-                      <Trash2 className="h-3.5 w-3.5 text-slate-400 hover:text-red-500 dark:hover:text-red-400" />
+                      <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                 ))}
               </div>
             )}
           </ScrollArea>
-
-          {/* Footer - User Info */}
-          <div className="border-t border-slate-200 dark:border-slate-800 px-3 py-3">
-            <div className="flex items-center gap-3 rounded-xl px-3 py-2.5 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800/50 dark:to-slate-800 border border-slate-200 dark:border-slate-700">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-nasa-blue to-blue-600 text-xs font-bold text-white shadow-sm">
-                {userId.charAt(0).toUpperCase()}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="truncate text-xs font-semibold text-slate-900 dark:text-slate-100">
-                  {conversations.length} conversation{conversations.length !== 1 ? 's' : ''}
-                </p>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400">
-                  Active session
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
       </aside>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Conversation</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this conversation? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

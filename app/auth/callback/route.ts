@@ -10,6 +10,6 @@ export async function GET(request: Request) {
     await supabase.auth.exchangeCodeForSession(code);
   }
 
-  // Redirect to chat page after successful auth
-  return NextResponse.redirect(new URL('/chat', request.url));
+  // Redirect to search page after successful auth
+  return NextResponse.redirect(new URL('/search', request.url));
 }

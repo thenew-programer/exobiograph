@@ -17,7 +17,8 @@ import {
   Monitor,
   Check,
   Building2,
-  FileText
+  FileText,
+  Users
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,12 +26,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import VerifiedBadge from "@/components/verification/VerifiedBadge";
 import VerificationPrompt from "@/components/verification/VerificationPrompt";
+import { AvatarUpload } from "@/components/profile/AvatarUpload";
 
 interface Props {
   user: User;
@@ -48,19 +51,25 @@ interface Props {
       theme?: string;
     };
   } | null;
+  followerCount?: number;
+  followingCount?: number;
 }
 
-export function ProfileInterface({ user, profile }: Props) {
+export function ProfileInterface({ user, profile, followerCount = 0, followingCount = 0 }: Props) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("profile");
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const [showVerificationPrompt, setShowVerificationPrompt] = useState(!profile?.is_verified);
+  const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
   // Profile settings
   const [fullName, setFullName] = useState(profile?.full_name || "");
   const [institution, setInstitution] = useState(profile?.institution || "");
   const [bio, setBio] = useState(profile?.bio || "");
+  const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || "");
   
   // Preferences
   const [emailNotifications, setEmailNotifications] = useState(profile?.preferences?.email_notifications ?? true);
@@ -135,6 +144,7 @@ export function ProfileInterface({ user, profile }: Props) {
   };
 
   const handleSignOut = async () => {
+    setIsSigningOut(true);
     try {
       const supabase = createBrowserClient();
       await supabase.auth.signOut();
@@ -143,16 +153,13 @@ export function ProfileInterface({ user, profile }: Props) {
     } catch (error) {
       console.error("Sign out error:", error);
       toast.error("Failed to sign out");
+    } finally {
+      setIsSigningOut(false);
+      setShowSignOutConfirm(false);
     }
   };
 
   const handleDeleteAccount = async () => {
-    const confirmText = prompt('Type "DELETE" to confirm account deletion:');
-    if (confirmText !== "DELETE") {
-      toast.error("Account deletion cancelled");
-      return;
-    }
-
     setIsDeleting(true);
 
     try {
@@ -172,7 +179,9 @@ export function ProfileInterface({ user, profile }: Props) {
       console.error("Delete error:", error);
       const errorMessage = error instanceof Error ? error.message : "Failed to delete account";
       toast.error(errorMessage);
+    } finally {
       setIsDeleting(false);
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -216,26 +225,59 @@ export function ProfileInterface({ user, profile }: Props) {
           {/* Profile Tab */}
           <TabsContent value="profile" className="space-y-6">
             <div className="rounded-xl border bg-white p-6 shadow-sm dark:bg-slate-900">
-              <div className="mb-6 flex items-center gap-4">
-                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-nasa-blue to-blue-600 text-2xl font-bold text-white">
-                  {fullName.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U'}
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                      {fullName || 'User'}
-                    </h2>
-                    {profile?.is_verified && <VerifiedBadge size="md" />}
-                  </div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
-                    {user.email}
-                  </p>
-                  {institution && (
-                    <p className="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-1 mt-1">
-                      <Building2 className="h-3 w-3" />
-                      {institution}
+              {/* Avatar and Profile Info Header */}
+              <div className="mb-6 pb-6 border-b dark:border-slate-700">
+                <div className="flex items-start gap-6">
+                  {/* Avatar with hover controls */}
+                  <AvatarUpload
+                    userId={user.id}
+                    currentAvatarUrl={avatarUrl}
+                    currentName={fullName || user.email || 'U'}
+                    onUploadSuccess={(url) => {
+                      setAvatarUrl(url);
+                      router.refresh();
+                    }}
+                  />
+
+                  {/* Profile Info */}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+                        {fullName || 'User'}
+                      </h2>
+                      {profile?.is_verified && <VerifiedBadge size="md" />}
+                    </div>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">
+                      {user.email}
                     </p>
-                  )}
+                    {institution && (
+                      <p className="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-1 mb-3">
+                        <Building2 className="h-4 w-4" />
+                        {institution}
+                      </p>
+                    )}
+                    {/* Followers/Following Stats */}
+                    <div className="flex gap-6 text-sm">
+                      <div className="flex items-center gap-1.5">
+                        <Users className="h-4 w-4 text-slate-500" />
+                        <span className="font-semibold text-slate-900 dark:text-white">
+                          {followerCount}
+                        </span>
+                        <span className="text-slate-600 dark:text-slate-400">
+                          Followers
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <UserIcon className="h-4 w-4 text-slate-500" />
+                        <span className="font-semibold text-slate-900 dark:text-white">
+                          {followingCount}
+                        </span>
+                        <span className="text-slate-600 dark:text-slate-400">
+                          Following
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -514,7 +556,7 @@ export function ProfileInterface({ user, profile }: Props) {
                 </div>
                 <Button 
                   variant="outline" 
-                  onClick={handleSignOut}
+                  onClick={() => setShowSignOutConfirm(true)}
                   className="ml-4"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
@@ -556,12 +598,12 @@ export function ProfileInterface({ user, profile }: Props) {
                   </div>
                   <Button
                     variant="destructive"
-                    onClick={handleDeleteAccount}
+                    onClick={() => setShowDeleteConfirm(true)}
                     disabled={isDeleting}
                     className="shrink-0"
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
-                    {isDeleting ? "Deleting..." : "Delete Account"}
+                    Delete Account
                   </Button>
                 </div>
               </div>
@@ -569,6 +611,32 @@ export function ProfileInterface({ user, profile }: Props) {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Sign Out Confirmation Dialog */}
+      <ConfirmationDialog
+        open={showSignOutConfirm}
+        onOpenChange={setShowSignOutConfirm}
+        onConfirm={handleSignOut}
+        title="Sign Out"
+        description="Are you sure you want to sign out? You'll need to log in again to access your account."
+        confirmText="Sign Out"
+        cancelText="Cancel"
+        variant="destructive"
+        isLoading={isSigningOut}
+      />
+
+      {/* Delete Account Confirmation Dialog */}
+      <ConfirmationDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        onConfirm={handleDeleteAccount}
+        title="Delete Account Permanently"
+        description="Are you absolutely sure? This will permanently delete your account, all conversations, search history, and all associated data. This action cannot be undone."
+        confirmText="Delete Account"
+        cancelText="Cancel"
+        variant="destructive"
+        isLoading={isDeleting}
+      />
     </div>
   );
 }
