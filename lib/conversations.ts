@@ -5,8 +5,12 @@ export type Message = {
   conversation_id: string;
   role: 'user' | 'assistant';
   content: string;
-  entities?: string[];
-  sources?: string[];
+  metadata?: {
+    entities?: string[];
+    sources?: string[];
+  };
+  entities?: string[]; // Computed from metadata for backwards compatibility
+  sources?: string[]; // Computed from metadata for backwards compatibility
   created_at: string;
 };
 
@@ -151,7 +155,12 @@ export async function getConversationMessages(
     return [];
   }
 
-  return data || [];
+  // Transform messages to extract entities and sources from metadata
+  return (data || []).map(msg => ({
+    ...msg,
+    entities: msg.metadata?.entities || [],
+    sources: msg.metadata?.sources || [],
+  }));
 }
 
 /**
@@ -198,8 +207,10 @@ export async function saveAssistantMessage(
       conversation_id: conversationId,
       role: 'assistant',
       content,
-      entities: entities || [],
-      sources: sources || [],
+      metadata: {
+        entities: entities || [],
+        sources: sources || [],
+      },
     })
     .select()
     .single();

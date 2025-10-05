@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Send, Sparkles, ArrowDown, Paperclip, X, Bot, Plus } from "lucide-react";
+import { Send, Sparkles, ArrowDown, Paperclip, X, Bot, Plus, MessageSquare, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +17,13 @@ import {
   createConversation,
 } from "@/lib/conversations";
 import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type ChatInterfaceProps = {
   userId: string;
@@ -38,6 +45,7 @@ export function ChatInterface({ userId, onTitleUpdate, userProfile }: ChatInterf
   const [isLoading, setIsLoading] = useState(false);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [mode, setMode] = useState<"question" | "summarize">("question");
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isParsingFiles, setIsParsingFiles] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -188,7 +196,11 @@ export function ChatInterface({ userId, onTitleUpdate, userProfile }: ChatInterf
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: fullMessage, conversationId }),
+        body: JSON.stringify({ 
+          message: fullMessage, 
+          conversationId,
+          mode: mode, // "question" or "summarize"
+        }),
       });
 
       if (!response.ok) {
@@ -411,7 +423,7 @@ export function ChatInterface({ userId, onTitleUpdate, userProfile }: ChatInterf
                 ref={textareaRef}
                 value={welcomeInput}
                 onChange={(e) => setWelcomeInput(e.target.value)}
-                placeholder="Ask me anything about space biology research..."
+                placeholder={mode === "summarize" ? "Paste text to summarize..." : "Ask me anything about space biology research..."}
                 className="min-h-[120px] w-full resize-none rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-6 py-4 pb-16 text-base focus:outline-none focus:ring-2 focus:ring-nasa-blue dark:focus:ring-blue-500"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
@@ -425,14 +437,36 @@ export function ChatInterface({ userId, onTitleUpdate, userProfile }: ChatInterf
               
               {/* Buttons inside textarea at bottom */}
               <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-10 w-10 p-0 text-slate-600 dark:text-slate-400"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Plus className="h-5 w-5" />
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-10 w-10 p-0 text-slate-600 dark:text-slate-400"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Plus className="h-5 w-5" />
+                  </Button>
+
+                  <Select value={mode} onValueChange={(value: "question" | "summarize") => setMode(value)}>
+                    <SelectTrigger className="h-10 w-[160px] border-slate-200 dark:border-slate-700">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="question">
+                        <div className="flex items-center gap-2">
+                          <MessageSquare className="h-4 w-4" />
+                          <span>Ask Question</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="summarize">
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4" />
+                          <span>Summarize Text</span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
                 <Button
                   onClick={handleNewChat}
@@ -627,22 +661,44 @@ export function ChatInterface({ userId, onTitleUpdate, userProfile }: ChatInterf
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyPress}
-              placeholder="Message ExoBioGraph..."
+              placeholder={mode === "summarize" ? "Paste text to summarize..." : "Message ExoBioGraph..."}
               className="min-h-[56px] max-h-[200px] w-full resize-none rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-6 py-4 pb-16 focus:outline-none focus:ring-2 focus:ring-nasa-blue dark:focus:ring-blue-500 shadow-[0_2px_8px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.4)]"
               disabled={isLoading}
             />
             
             {/* Buttons inside textarea at bottom */}
             <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-10 w-10 p-0 text-slate-600 dark:text-slate-400" 
-                disabled={isLoading}
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <Plus className="h-5 w-5" />
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-10 w-10 p-0 text-slate-600 dark:text-slate-400" 
+                  disabled={isLoading}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Plus className="h-5 w-5" />
+                </Button>
+
+                <Select value={mode} onValueChange={(value: "question" | "summarize") => setMode(value)}>
+                  <SelectTrigger className="h-10 w-[160px] border-slate-200 dark:border-slate-700">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="question">
+                      <div className="flex items-center gap-2">
+                        <MessageSquare className="h-4 w-4" />
+                        <span>Ask Question</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="summarize">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4" />
+                        <span>Summarize Text</span>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
               <Button
                 onClick={handleSendMessage}
