@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { Network, Filter } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { ENTITY_COLORS, ENTITY_TYPE_LABELS } from "@/lib/types";
+import { Network } from "lucide-react";
+import { CategoryFilter } from "@/components/filters/CategoryFilter";
+import { useCategoryFilter } from "@/hooks/useCategoryFilter";
 import type { EntityType, GraphStats } from "@/lib/types";
 import { ForceGraph } from "./ForceGraph";
 
@@ -12,31 +11,29 @@ interface Props {
 }
 
 export function KnowledgeGraphInterface({ initialStats }: Props) {
-  const [selectedTypes, setSelectedTypes] = useState<Set<EntityType>>(
-    new Set(["organism", "condition", "effect", "endpoint"])
+  const [selectedCategories, setSelectedCategories] = useCategoryFilter(
+    "graph-category-filter",
+    ["sample", "conditions", "result", "objective", "entity"], // All selected by default
+    true // Use Set instead of Array
   );
   const stats = initialStats;
 
-  const entityTypes: EntityType[] = ["organism", "condition", "effect", "endpoint"];
-
-  const toggleEntityType = (type: EntityType) => {
-    setSelectedTypes((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(type)) {
-        newSet.delete(type);
-      } else {
-        newSet.add(type);
-      }
-      return newSet;
-    });
+  const toggleCategory = (type: EntityType) => {
+    const newSet = new Set(selectedCategories);
+    if (newSet.has(type)) {
+      newSet.delete(type);
+    } else {
+      newSet.add(type);
+    }
+    setSelectedCategories(newSet);
   };
 
   const selectAll = () => {
-    setSelectedTypes(new Set(entityTypes));
+    setSelectedCategories(new Set(["sample", "conditions", "result", "objective", "entity"]));
   };
 
   const clearAll = () => {
-    setSelectedTypes(new Set());
+    setSelectedCategories(new Set());
   };
 
   return (
@@ -49,7 +46,7 @@ export function KnowledgeGraphInterface({ initialStats }: Props) {
               Knowledge Graph
             </h1>
             <p className="text-slate-600 dark:text-slate-400">
-              Explore relationships between organisms, conditions, effects, and endpoints
+              Explore relationships between samples, conditions, results, objectives, and entities
             </p>
           </div>
 
@@ -79,57 +76,32 @@ export function KnowledgeGraphInterface({ initialStats }: Props) {
           )}
 
           {/* Filters */}
-          <div className="flex flex-wrap items-center gap-2">
-            <Filter className="h-4 w-4 text-slate-500" />
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-              Show entity types:
-            </span>
-            {entityTypes.map((type) => (
-              <Badge
-                key={type}
-                variant={selectedTypes.has(type) ? "default" : "outline"}
-                className={`cursor-pointer transition-colors ${
-                  selectedTypes.has(type)
-                    ? `${ENTITY_COLORS[type].bg} ${ENTITY_COLORS[type].text}`
-                    : "hover:bg-slate-100 dark:hover:bg-slate-800"
-                }`}
-                onClick={() => toggleEntityType(type)}
-              >
-                {ENTITY_TYPE_LABELS[type]}
-              </Badge>
-            ))}
-            <button
-              onClick={selectAll}
-              className="text-sm text-slate-500 underline hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
-            >
-              Select All
-            </button>
-            <button
-              onClick={clearAll}
-              className="text-sm text-slate-500 underline hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
-            >
-              Clear All
-            </button>
-          </div>
+          <CategoryFilter
+            selectedCategories={selectedCategories}
+            onToggle={toggleCategory}
+            onSelectAll={selectAll}
+            onClearAll={clearAll}
+            mode="expanded"
+          />
         </div>
       </div>
 
       {/* Graph */}
       <div className="flex-1 bg-slate-50 dark:bg-slate-950">
-        {selectedTypes.size === 0 ? (
+        {selectedCategories.size === 0 ? (
           <div className="flex h-full items-center justify-center">
             <div className="text-center">
-              <Filter className="mx-auto mb-4 h-12 w-12 text-slate-400" />
+              <Network className="mx-auto mb-4 h-12 w-12 text-slate-400" />
               <h3 className="mb-2 text-lg font-semibold text-slate-900 dark:text-white">
-                No entity types selected
+                No categories selected
               </h3>
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                Select at least one entity type to view the graph
+                Select at least one category to view the graph
               </p>
             </div>
           </div>
         ) : (
-          <ForceGraph selectedTypes={selectedTypes} />
+          <ForceGraph selectedCategories={selectedCategories} />
         )}
       </div>
     </div>

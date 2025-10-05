@@ -7,7 +7,7 @@
 // Entity Types
 // ============================================================================
 
-export type EntityType = 'organism' | 'condition' | 'effect' | 'endpoint';
+export type EntityType = 'sample' | 'conditions' | 'result' | 'objective' | 'entity';
 
 export interface Entity {
   id: string;
@@ -202,32 +202,38 @@ export interface ApiResponse<T> {
 // ============================================================================
 
 export const ENTITY_COLORS: Record<EntityType, { bg: string; text: string; border: string }> = {
-  organism: {
-    bg: 'bg-green-100 dark:bg-green-900/30',
-    text: 'text-green-700 dark:text-green-300',
-    border: 'border-green-300 dark:border-green-700',
+  sample: {
+    bg: 'bg-blue-100 dark:bg-blue-900/30',
+    text: 'text-blue-700 dark:text-blue-300',
+    border: 'border-blue-300 dark:border-blue-700',
   },
-  condition: {
+  conditions: {
     bg: 'bg-amber-100 dark:bg-amber-900/30',
     text: 'text-amber-700 dark:text-amber-300',
     border: 'border-amber-300 dark:border-amber-700',
   },
-  effect: {
-    bg: 'bg-red-100 dark:bg-red-900/30',
-    text: 'text-red-700 dark:text-red-300',
-    border: 'border-red-300 dark:border-red-700',
+  result: {
+    bg: 'bg-green-100 dark:bg-green-900/30',
+    text: 'text-green-700 dark:text-green-300',
+    border: 'border-green-300 dark:border-green-700',
   },
-  endpoint: {
+  objective: {
     bg: 'bg-purple-100 dark:bg-purple-900/30',
     text: 'text-purple-700 dark:text-purple-300',
     border: 'border-purple-300 dark:border-purple-700',
+  },
+  entity: {
+    bg: 'bg-slate-100 dark:bg-slate-900/30',
+    text: 'text-slate-700 dark:text-slate-300',
+    border: 'border-slate-300 dark:border-slate-700',
   },
 };
 
 // Entity type display names
 export const ENTITY_TYPE_LABELS: Record<EntityType, string> = {
-  organism: 'Organism',
-  condition: 'Condition',
-  effect: 'Effect',
-  endpoint: 'Endpoint',
+  sample: 'Sample',
+  conditions: 'Conditions',
+  result: 'Result',
+  objective: 'Objective',
+  entity: 'Entity',
 };

@@ -10,7 +10,7 @@ type SimulationNode = GraphNode & d3.SimulationNodeDatum;
 type SimulationLink = d3.SimulationLinkDatum<SimulationNode>;
 
 interface Props {
-  selectedTypes: Set<EntityType>;
+  selectedCategories: Set<EntityType>;
 }
 
 // Cache for graph data to avoid repeated API calls
@@ -18,7 +18,7 @@ const graphDataCache = new Map<string, GraphData>();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 const cacheTimestamps = new Map<string, number>();
 
-export function ForceGraph({ selectedTypes }: Props) {
+export function ForceGraph({ selectedCategories }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
   const [graphData, setGraphData] = useState<GraphData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -29,8 +29,8 @@ export function ForceGraph({ selectedTypes }: Props) {
   // Fetch graph data with caching
   useEffect(() => {
     async function fetchGraphData() {
-      // Create cache key from selected types
-      const cacheKey = Array.from(selectedTypes).sort().join(',');
+      // Create cache key from selected categories
+      const cacheKey = Array.from(selectedCategories).sort().join(',');
       
       // Check if we have valid cached data
       const cachedData = graphDataCache.get(cacheKey);
@@ -53,7 +53,7 @@ export function ForceGraph({ selectedTypes }: Props) {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            entityTypes: Array.from(selectedTypes),
+            entityTypes: Array.from(selectedCategories),
           }),
         });
 
@@ -83,10 +83,10 @@ export function ForceGraph({ selectedTypes }: Props) {
       }
     }
 
-    if (selectedTypes.size > 0) {
+    if (selectedCategories.size > 0) {
       fetchGraphData();
     }
-  }, [selectedTypes]);
+  }, [selectedCategories]);
 
   // Render D3 graph
   useEffect(() => {
@@ -389,11 +389,12 @@ export function ForceGraph({ selectedTypes }: Props) {
   }, [graphData]);
 
   function getNodeColor(type: EntityType): string {
-    const colors = {
-      organism: "#10b981", // emerald
-      condition: "#f59e0b", // amber
-      effect: "#ef4444",    // red
-      endpoint: "#8b5cf6", // purple
+    const colors: Record<EntityType, string> = {
+      sample: "#3b82f6",      // blue
+      conditions: "#f59e0b",  // amber
+      result: "#10b981",      // green
+      objective: "#8b5cf6",   // purple
+      entity: "#64748b",      // slate
     };
     return colors[type];
   }
@@ -592,7 +593,7 @@ export function ForceGraph({ selectedTypes }: Props) {
           Legend
         </h4>
         <div className="space-y-2">
-          {(["organism", "condition", "effect", "endpoint"] as EntityType[]).map((type) => (
+          {(["sample", "conditions", "result", "objective", "entity"] as EntityType[]).map((type) => (
             <div key={type} className="flex items-center gap-2.5">
               <div
                 className="h-3 w-3 rounded-full"

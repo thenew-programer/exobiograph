@@ -1,10 +1,7 @@
 export type VerificationMethod =
-  | 'edu_email'
   | 'researchgate'
   | 'google_scholar'
-  | 'orcid'
-  | 'linkedin'
-  | 'manual_review';
+  | 'orcid';
 
 export type VerificationStatus = 'pending' | 'approved' | 'rejected' | 'under_review';
 
@@ -15,18 +12,10 @@ export interface VerificationRequest {
   status: VerificationStatus;
   
   // Evidence fields
-  edu_email?: string;
   researchgate_url?: string;
   google_scholar_url?: string;
   orcid_id?: string;
-  linkedin_url?: string;
   additional_info?: string;
-  supporting_documents?: string[];
-  
-  // Verification details
-  verification_code?: string;
-  code_expires_at?: string;
-  verified_at?: string;
   
   // Admin review
   reviewed_by?: string;
@@ -40,13 +29,10 @@ export interface VerificationRequest {
 
 export interface VerificationSubmission {
   verification_method: VerificationMethod;
-  edu_email?: string;
   researchgate_url?: string;
   google_scholar_url?: string;
   orcid_id?: string;
-  linkedin_url?: string;
   additional_info?: string;
-  supporting_documents?: File[];
 }
 
 export interface VerificationReview {

@@ -5,24 +5,36 @@ import { Search as SearchIcon, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { CategoryFilter } from "@/components/filters/CategoryFilter";
+import { useCategoryFilter } from "@/hooks/useCategoryFilter";
 import { ENTITY_COLORS, ENTITY_TYPE_LABELS } from "@/lib/types";
 import type { EntityType, SearchResult } from "@/lib/types";
 import { toast } from "sonner";
 
 export function SearchInterface() {
   const [query, setQuery] = useState("");
-  const [selectedTypes, setSelectedTypes] = useState<EntityType[]>([]);
+  const [selectedCategories, setSelectedCategories] = useCategoryFilter(
+    "search-category-filter",
+    [] // Start with no categories selected by default
+  );
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const entityTypes: EntityType[] = ["organism", "condition", "effect", "endpoint"];
+  const toggleCategory = (type: EntityType) => {
+    const newCategories = selectedCategories.includes(type)
+      ? selectedCategories.filter((t) => t !== type)
+      : [...selectedCategories, type];
+    setSelectedCategories(newCategories);
+  };
 
-  const toggleEntityType = (type: EntityType) => {
-    setSelectedTypes((prev) =>
-      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
-    );
+  const selectAllCategories = () => {
+    setSelectedCategories(["sample", "conditions", "result", "objective", "entity"]);
+  };
+
+  const clearAllCategories = () => {
+    setSelectedCategories([]);
   };
 
   const handleSearch = async () => {
@@ -38,7 +50,7 @@ export function SearchInterface() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           query: query.trim(),
-          entityTypes: selectedTypes.length > 0 ? selectedTypes : undefined,
+          entityTypes: selectedCategories.length > 0 ? selectedCategories : undefined,
         }),
       });
 
@@ -106,33 +118,15 @@ export function SearchInterface() {
             </Button>
           </div>
 
-          {/* Entity Type Filters */}
-          <div className="mt-4 flex flex-wrap gap-2">
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-              Filter by type:
-            </span>
-            {entityTypes.map((type) => (
-              <Badge
-                key={type}
-                variant={selectedTypes.includes(type) ? "default" : "outline"}
-                className={`cursor-pointer transition-colors ${
-                  selectedTypes.includes(type)
-                    ? `${ENTITY_COLORS[type]} text-white`
-                    : "hover:bg-slate-100 dark:hover:bg-slate-800"
-                }`}
-                onClick={() => toggleEntityType(type)}
-              >
-                {ENTITY_TYPE_LABELS[type]}
-              </Badge>
-            ))}
-            {selectedTypes.length > 0 && (
-              <button
-                onClick={() => setSelectedTypes([])}
-                className="text-sm text-slate-500 underline hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
-              >
-                Clear filters
-              </button>
-            )}
+          {/* Category Filters */}
+          <div className="mt-4">
+            <CategoryFilter
+              selectedCategories={selectedCategories}
+              onToggle={toggleCategory}
+              onSelectAll={selectAllCategories}
+              onClearAll={clearAllCategories}
+              mode="compact"
+            />
           </div>
         </div>
 
@@ -276,8 +270,13 @@ function highlightEntities(
     }
 
     // Add highlighted entity
+    // Use type guard to ensure entity.type is valid
+    const entityColor = entity.type && ENTITY_COLORS[entity.type] 
+      ? ENTITY_COLORS[entity.type] 
+      : { text: "text-gray-700", bg: "bg-gray-100", border: "border-gray-300" };
+    
     parts.push(
-      <span key={idx} className={`font-semibold ${ENTITY_COLORS[entity.type].text}`}>
+      <span key={idx} className={`font-semibold ${entityColor.text}`}>
         {text.substring(start, end)}
       </span>
     );
