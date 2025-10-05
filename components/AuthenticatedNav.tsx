@@ -63,8 +63,8 @@ export function AuthenticatedNav({ userEmail }: AuthenticatedNavProps) {
   };
 
   const navLinks = [
-    { href: '/chat', label: 'AI Chat', icon: MessageSquare },
     { href: '/search', label: 'Search', icon: Search },
+    { href: '/chat', label: 'AI Chat', icon: MessageSquare },
     { href: '/graph', label: 'Knowledge Graph', icon: Network },
     { href: '/community', label: 'Community', icon: Users },
   ];

@@ -6,7 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "import-papers": "node scripts/import-papers.js",
+    "extract-entities": "node scripts/extract-entities.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
