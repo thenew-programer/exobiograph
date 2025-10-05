@@ -81,7 +81,7 @@ export function KnowledgeGraphInterface({ initialStats }: Props) {
             onToggle={toggleCategory}
             onSelectAll={selectAll}
             onClearAll={clearAll}
-            mode="expanded"
+            mode="compact"
           />
         </div>
       </div>
