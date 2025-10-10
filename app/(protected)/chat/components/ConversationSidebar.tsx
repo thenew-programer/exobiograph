@@ -195,7 +195,7 @@ export function ConversationSidebar({
                       router.push(`/chat?id=${conversation.id}`);
                     }}
                   >
-                    <div className="flex-1 min-w-0 py-0.5">
+                    <div className="flex-1 min-w-0 overflow-hidden py-0.5">
                       <p className={`truncate text-sm font-medium leading-tight mb-1.5 ${
                         conversationId === conversation.id
                           ? 'text-nasa-blue dark:text-blue-400'
@@ -204,14 +204,14 @@ export function ConversationSidebar({
                         {conversation.title}
                       </p>
                       <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-                        <Clock className="h-3 w-3" />
-                        <span>{formatConversationDate(conversation.updated_at)}</span>
+                        <Clock className="h-3 w-3 flex-shrink-0" />
+                        <span className="truncate">{formatConversationDate(conversation.updated_at)}</span>
                       </div>
                     </div>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-600 dark:hover:text-red-400"
+                      className="h-7 w-7 flex-shrink-0 self-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-600 dark:hover:text-red-400"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDeleteConversation(conversation.id);
